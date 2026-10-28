@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-marfil text-ink font-sans antialiased;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  ::selection {
+    background: #0b1f3a;
+    color: #fff;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-ink bg-ink px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sello focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply btn border-ink-100 bg-white text-ink hover:bg-ink-100/50;
+  }
+  .btn-sello {
+    @apply btn border-sello bg-sello hover:bg-[#99101F];
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  .input {
+    @apply w-full min-w-0 rounded-md border border-ink-100 bg-white px-3 py-2.5 text-[15px] text-ink placeholder:text-ink-300 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/15;
+  }
+  .label {
+    @apply text-[11px] font-semibold uppercase tracking-[.08em] text-ink-300;
+  }
+  .card {
+    @apply rounded-xl border border-ink-100 bg-white p-5 shadow-card;
+  }
+  .chip {
+    @apply inline-block rounded-md border border-ink-100 bg-marfil px-2 py-1 font-mono text-[11.5px] text-ink;
+  }
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[.14em] text-sello;
+  }
+  .paper {
+    @apply whitespace-pre-wrap break-words rounded-sm border border-paper-line bg-paper px-7 py-7 font-display text-[15px] leading-[1.6] text-ink shadow-paper;
+  }
+  @media (max-width: 480px) {
+    .paper {
+      @apply px-4 py-5 text-[14px];
+    }
+    .input {
+      font-size: 16px;
+    }
+  }
+}

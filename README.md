@@ -21,6 +21,7 @@ app/
     cuenta/                Mi cuenta: datos para las cartas, exportar JSON, eliminar cuenta
   api/casos/[id]/pdf       PDF de la carta
   api/cuenta/exportar      Exportación completa en JSON (Ley 21.719)
+  api/uf                   Valor UF del día (mindicador.cl, con caché y tiempo límite)
   legal/                   Privacidad y términos
   icon.svg · opengraph-image.tsx · robots.ts · sitemap.ts · not-found.tsx
 components/                UI: Wizard, Carta, CartaPDF, Dossier, CasoAcciones, CuentaForms…
@@ -92,7 +93,7 @@ Toda la lógica está en `lib/legal/`:
 
 - `motor.ts` — `derivar()` calcula la reparación (monto, UF por sobreventa, descuento proporcional, cobros × meses) y el plazo que fija la carta (10 días hábiles; 5 en telecom). `alertas()` avisa si venció la garantía legal (6 meses), el retracto (10 días) o la prescripción (2 años). `fundamentos()` y `solicitud()` arman los párrafos legales por categoría y subtipo. `carta()`, `textoSernac()` y `hitos()` producen la carta, el texto para el organismo y la línea de tiempo.
 - `feriados.ts` — feriados nacionales 2026 y 2027 para contar días hábiles. **Agregar el año siguiente cada diciembre.**
-- `uf.ts` — valor UF del día desde mindicador.cl (caché de 1 hora, con valor de respaldo editable en el formulario).
+- `uf.ts` — valor UF del día desde mindicador.cl (caché de 1 hora, tiempo límite de 4 s y valor de respaldo editable en el formulario). El wizard lo pide por `/api/uf` solo cuando hay sobreventa de vuelo.
 - `categorias.ts` — textos, bases legales, reparaciones y evidencia por categoría; tabla UF de la Ley 20.831.
 
 **Antes de lanzar públicamente**, haz revisar por un abogado los textos de `fundamentos()` y la tabla UF de `categorias.ts` (Ley 20.831).

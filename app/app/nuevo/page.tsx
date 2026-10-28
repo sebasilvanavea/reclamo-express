@@ -1,6 +1,5 @@
 import { Wizard } from "@/components/Wizard";
 import { DATOS_VACIOS } from "@/lib/legal/motor";
-import { valorUF } from "@/lib/legal/uf";
 import { createClient } from "@/lib/supabase/server";
 import type { DatosCaso } from "@/lib/types";
 
@@ -11,14 +10,10 @@ export default async function NuevoCaso() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const [{ data: perfil }, uf] = await Promise.all([
-    supabase.from("profiles").select("nombre, rut, telefono, ciudad, domicilio").eq("id", user!.id).maybeSingle(),
-    valorUF(),
-  ]);
+  const { data: perfil } = await supabase.from("profiles").select("nombre, rut, telefono, ciudad, domicilio").eq("id", user!.id).maybeSingle();
 
   const inicial: DatosCaso = {
     ...DATOS_VACIOS,
-    uf: String(uf.valor),
     email: user?.email ?? "",
     nombre: perfil?.nombre ?? "",
     rut: perfil?.rut ?? "",
@@ -28,5 +23,5 @@ export default async function NuevoCaso() {
     reparacion: "devolucion",
   };
 
-  return <Wizard inicial={inicial} ufInfo={uf} />;
+  return <Wizard inicial={inicial} />;
 }

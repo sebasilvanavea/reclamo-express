@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { crearCaso } from "@/app/app/nuevo/actions";
 import { CATEGORIAS, CATEGORIA_KEYS, UF_TABLA } from "@/lib/legal/categorias";
 import { dossier, reparaciones } from "@/lib/legal/motor";
@@ -23,8 +23,28 @@ function Field({ id, label, hint, children }: { id: string; label: string; hint?
 
 type UfInfo = { valor: number; fecha: string | null; fuente: "mindicador" | "respaldo" };
 
-export function Wizard({ inicial, ufInfo }: { inicial: DatosCaso; ufInfo?: UfInfo }) {
+export function Wizard({ inicial }: { inicial: DatosCaso }) {
   const [s, setS] = useState<DatosCaso>(inicial);
+  const [ufInfo, setUfInfo] = useState<UfInfo | null>(null);
+  const ufEditada = useRef(false);
+
+  // Valor UF del día: se consulta una sola vez y solo cuando hace falta (sobreventa de vuelo).
+  const necesitaUF = s.cat === "vuelo" && s.subtipo === "denegacion";
+  useEffect(() => {
+    if (!necesitaUF || ufInfo) return;
+    let activo = true;
+    fetch("/api/uf")
+      .then((r) => r.json())
+      .then((u: UfInfo) => {
+        if (!activo) return;
+        setUfInfo(u);
+        if (u.fuente === "mindicador" && !ufEditada.current) setS((p) => ({ ...p, uf: String(u.valor) }));
+      })
+      .catch(() => activo && setUfInfo({ valor: Number(inicial.uf) || 0, fecha: null, fuente: "respaldo" }));
+    return () => {
+      activo = false;
+    };
+  }, [necesitaUF, ufInfo, inicial.uf]);
   const [paso, setPaso] = useState(0);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
@@ -188,9 +208,26 @@ export function Wizard({ inicial, ufInfo }: { inicial: DatosCaso; ufInfo?: UfInf
                     <Field
                       id="uf"
                       label="Valor UF del día (CLP)"
-                      hint={ufInfo?.fuente === "mindicador" ? `Valor oficial al ${ufInfo.fecha} (mindicador.cl). Puedes ajustarlo.` : "No pudimos obtener el valor de hoy: revísalo en sii.cl o mindicador.cl"}
+                      hint={
+                        !ufInfo
+                          ? "Buscando el valor de hoy…"
+                          : ufInfo.fuente === "mindicador"
+                            ? `Valor oficial al ${ufInfo.fecha} (mindicador.cl). Puedes ajustarlo.`
+                            : "No pudimos obtener el valor de hoy: revísalo en sii.cl o mindicador.cl"
+                      }
                     >
-                      <input id="uf" type="number" inputMode="numeric" min={0} className="input" value={s.uf} onChange={(e) => set("uf", e.target.value)} />
+                      <input
+                        id="uf"
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        className="input"
+                        value={s.uf}
+                        onChange={(e) => {
+                          ufEditada.current = true;
+                          set("uf", e.target.value);
+                        }}
+                      />
                     </Field>
                   </>
                 )}

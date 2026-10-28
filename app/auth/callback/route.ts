@@ -11,14 +11,16 @@ export async function GET(request: Request) {
   const next = nextParam.startsWith("/") ? nextParam : "/app";
 
   const supabase = await createClient();
+  // Destino absoluto y sin la query de esta petición (el middleware limpia lo que el hosting agregue).
+  const destino = new URL(next, origin);
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(`${origin}${next}`);
+    if (!error) return NextResponse.redirect(destino);
   } else if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-    if (!error) return NextResponse.redirect(`${origin}${next}`);
+    if (!error) return NextResponse.redirect(destino);
   }
 
-  return NextResponse.redirect(`${origin}/login?error=enlace`);
+  return NextResponse.redirect(new URL("/login?error=enlace", origin));
 }
